@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ stock.company_name }} ({{ stock.symbol }}) - Stock Info</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 0; text-align: center; margin-bottom: 2rem; border-radius: 10px; }
+        .card { background: white; border-radius: 10px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
+        .metric-card { background: #f8fafc; padding: 1rem; border-radius: 8px; text-align: center; }
+        .price-positive { color: #10b981; }
+        .price-negative { color: #ef4444; }
+        .explanation { background: #e0f2fe; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #0288d1; }
+        .back-btn { display: inline-block; padding: 10px 20px; background: #64748b; color: white; text-decoration: none; border-radius: 8px; margin-bottom: 1rem; }
+        .large-number { font-size: 2rem; font-weight: bold; margin: 0.5rem 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Back to Dashboard</a>
+
+        <div class="header">
+            <h1>{{ stock.company_name }}</h1>
+            <h2>{{ stock.symbol }}</h2>
+        </div>
+
+        <div class="card">
+            <h2> Current Price</h2>
+            <div class="large-number">${{ "%.2f"|format(stock.current_price) }}</div>
+            <p class="{% if stock.daily_change >= 0 %}price-positive{% else %}price-negative{% endif %}">
+                Today: {{ "+" if stock.daily_change >= 0 else "" }}${{ "%.2f"|format(stock.daily_change) }}
+                ({{ "+" if stock.daily_change_percent >= 0 else "" }}{{ "%.2f"|format(stock.daily_change_percent) }}%)
+            </p>
+            <div class="explanation">
+                <strong>What this means:</strong> This is how much it costs to buy one share of {{ stock.company_name }} right now.
+                {% if stock.daily_change >= 0 %}
+                The green number shows it went UP by ${{ "%.2f"|format(stock.daily_change) }} today - that's good for people who own the stock!
+                {% else %}
+                The red number shows it went DOWN by ${{ "%.2f"|format(stock.daily_change|abs) }} today - that means the stock lost value.
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="metric-grid">
+            <div class="metric-card">
+                <h3> Weekly Change</h3>
+                <div class="{% if stock.weekly_change >= 0 %}price-positive{% else %}price-negative{% endif %}">
+                    {{ "+" if stock.weekly_change >= 0 else "" }}${{ "%.2f"|format(stock.weekly_change) }}
+                </div>
+                <small>{{ "+" if stock.weekly_change_percent >= 0 else "" }}{{ "%.2f"|format(stock.weekly_change_percent) }}% this week</small>
+            </div>
+
+            <div class="metric-card">
+                <h3> Price Trend</h3>
+                <div class="{% if stock.price_trend == 'Rising' %}price-positive{% elif stock.price_trend == 'Falling' %}price-negative{% endif %}">
+                    {{ "📈" if stock.price_trend == "Rising" else "📉" if stock.price_trend == "Falling" else "➡️" }} {{ stock.price_trend }}
+                </div>
+                <small>Recent direction</small>
+            </div>
+
+            <div class="metric-card">
+                <h3> Trading Volume</h3>
+                <div>{{ "{:,.0f}".format(stock.volume) }}</div>
+                <small>{{ stock.volume_trend }} activity</small>
+            </div>
+
+            <div class="metric-card">
+                <h3> Highest Price</h3>
+                <div class="price-positive">${{ "%.2f"|format(stock.high_52w) }}</div>
+                <small>In recent data</small>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2> What Do These Numbers Mean?</h2>
+            <div class="explanation">
+                <p><strong>Daily Change:</strong> Shows if the stock went up (green) or down (red) compared to yesterday's closing price.</p>
+                <br>
+                <p><strong>Volume:</strong> How many shares were traded today. High volume = lots of people buying/selling (big news or events). Low volume = quiet day.</p>
+                <br>
+                <p><strong>Trend:</strong> Looking at the last few days, is the stock generally going up, down, or staying the same?</p>
+                <br>
+                <p><strong>Why stocks change:</strong> Company news, economic events, earnings reports, or just general market mood can make prices go up or down!</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2> Recent Price History</h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f1f5f9;">
+                            <th style="padding: 10px; text-align: left;">Date</th>
+                            <th style="padding: 10px; text-align: right;">Open</th>
+                            <th style="padding: 10px; text-align: right;">High</th>
+                            <th style="padding: 10px; text-align: right;">Low</th>
+                            <th style="padding: 10px; text-align: right;">Close</th>
+                            <th style="padding: 10px; text-align: right;">Volume</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in stock.historical_data[:7] %}
+                        <tr>
+                            <td style="padding: 10px;">{{ day.date[:10] }}</td>
+                            <td style="padding: 10px; text-align: right;">${{ "%.2f"|format(day.open) }}</td>
+                            <td style="padding: 10px; text-align: right; color: #10b981;">${{ "%.2f"|format(day.high) }}</td>
+                            <td style="padding: 10px; text-align: right; color: #ef4444;">${{ "%.2f"|format(day.low) }}</td>
+                            <td style="padding: 10px; text-align: right; font-weight: bold;">${{ "%.2f"|format(day.close) }}</td>
+                            <td style="padding: 10px; text-align: right;">{{ "{:,.0f}".format(day.volume) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="explanation">
+                <strong>Reading the table:</strong>
+                <br>• <strong>Open:</strong> Price when trading started that day
+                <br>• <strong>High/Low:</strong> Highest and lowest prices that day
+                <br>• <strong>Close:</strong> Final price when trading ended
+                <br>• <strong>Volume:</strong> Total shares traded that day
+            </div>
+        </div>
+    </div>
+</body>
+</html>

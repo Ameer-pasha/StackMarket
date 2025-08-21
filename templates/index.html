@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Dashboard - Learn About Stocks!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 0; text-align: center; margin-bottom: 2rem; border-radius: 10px; }
+        .card { background: white; border-radius: 10px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stock-card { background: white; border-radius: 8px; padding: 1.5rem; text-decoration: none; color: inherit; transition: transform 0.2s; border: 2px solid #e2e8f0; }
+        .stock-card:hover { transform: translateY(-5px); border-color: #667eea; }
+        .search-form { display: flex; gap: 1rem; max-width: 400px; margin: 0 auto 2rem; }
+        .search-form input { flex: 1; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; }
+        .btn { padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .explanation { background: #e0f2fe; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #0288d1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Stock Dashboard</h1>
+            <p>Learn about stocks with real-time data!</p>
+        </div>
+
+        <div class="card">
+            <h2>🔍 Search Any Stock</h2>
+            <div class="explanation">
+                <strong>What's a stock symbol?</strong> It's a short code for companies (like AAPL for Apple, GOOGL for Google). Try searching for your favorite companies!
+            </div>
+            <form method="POST" action="/search" class="search-form">
+                <input type="text" name="symbol" placeholder="Enter stock symbol (e.g., AAPL)" required>
+                <button type="submit" class="btn">Get Stock Info</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>🏆 Popular Stocks to Try</h2>
+            <div class="explanation">
+                <strong>New to stocks?</strong> Click on any company below to see their stock information. You'll learn what the numbers mean!
+            </div>
+            <div class="stock-grid">
+                {% for symbol, name in popular_stocks.items() %}
+                <a href="/stock/{{ symbol }}" class="stock-card">
+                    <h3>{{ symbol }}</h3>
+                    <p>{{ name }}</p>
+                    <small>Click to view details →</small>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>What You'll Learn</h2>
+            <div class="stock-grid">
+                <div class="stock-card">
+                    <h4>💰 Stock Price</h4>
+                    <p>How much one share costs right now</p>
+                </div>
+                <div class="stock-card">
+                    <h4>📊 Daily Changes</h4>
+                    <p>How much the price went up or down today</p>
+                </div>
+                <div class="stock-card">
+                    <h4>📈 Trends</h4>
+                    <p>Whether the stock is generally rising or falling</p>
+                </div>
+                <div class="stock-card">
+                    <h4>🔊 Volume</h4>
+                    <p>How many people are buying/selling</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
